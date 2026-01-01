@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotics Club - NIT Patna</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            --bg-dark: #050505;
+            --bg-card: rgba(18, 18, 18, 0.8); /* Made slightly transparent for bg effect */
+            --primary-cyan: #00e5ff;
+            --primary-orange: #ff5722;
+            --gradient-orange: linear-gradient(135deg, #ff5722, #ff2a2a);
+            --gradient-blue: linear-gradient(135deg, #00e5ff, #0088ff);
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+            --font-main: 'Inter', sans-serif;
+        }
+
+        /* --- RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            position: relative;
+        }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+        img { display: block; max-width: 100%; }
+
+        /* --- DYNAMIC BACKGROUND CANVAS --- */
+        #tech-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Behind everything */
+            background: #050505; /* Fallback color */
+        }
+
+        /* --- PRELOADER --- */
+        /* #preloader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-out, visibility 0.8s;
+        }
+        .loader-logo {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            animation: pulse 1.5s infinite;
+            border-radius: 50%;
+            background: #000;
+            border: 2px solid var(--primary-cyan);
+            padding: 10px;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 229, 255, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(0, 229, 255, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 229, 255, 0); }
+        } */
+
+        /* --- PRELOADER --- */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #050505; /* Deep black background */
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 1s ease-out, visibility 1s;
+        }
+
+        .spinner-container {
+            position: relative;
+            /* No fixed width/height needed here, it adapts to the image */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .preloader-logo {
+            width: 350px; /* Slightly larger for impact */
+            height: auto;
+            animation: neon-breathe 1.5s infinite ease-in-out;
+        }
+        
+        
+
+        /* The Distinctive Effect: Glow follows the logo shape */
+        @keyframes neon-breathe {
+            /* Start and End at the same state for a seamless loop */
+            0%, 100% {
+                transform: scale(1); /* Normal size */
+                filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.4)); /* Faint glow */
+                opacity: 0.9;
+            }
+            /* The "Inhale" state - slightly bigger and brighter */
+            50% {
+                transform: scale(1.1); /* Expand by 10% */
+                filter: drop-shadow(0 0 20px rgba(0, 229, 255, 0.9)); /* Intense glow */
+                opacity: 1;
+            }
+        }
+        
+
+        .preloader-hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* --- UTILITIES --- */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section-padding { padding: 80px 0; position: relative; }
+        
+        .btn {
+            padding: 12px 28px; border-radius: 4px; font-weight: 700;
+            text-transform: uppercase; font-size: 0.9rem; cursor: pointer;
+            transition: all 0.3s ease; display: inline-block;
+        }
+        .btn-primary {
+            background: var(--gradient-orange); color: white; border: none;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 87, 34, 0.3);
+        }
+        .btn-outline {
+            background: transparent; border: 2px solid rgba(255,255,255,0.3); color: white;
+            backdrop-filter: blur(5px);
+        }
+        .btn-outline:hover {
+            border-color: white; background: rgba(255,255,255,0.1);
+        }
+        .btn-cyan { border: 2px solid var(--primary-cyan); color: var(--primary-cyan); }
+        .btn-cyan:hover { background: var(--primary-cyan); color: #000; box-shadow: 0 0 15px var(--primary-cyan); }
+
+        /* --- NAVBAR --- */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            background: rgba(5,5,5,0.8); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        nav {
+            height: 80px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo-area { display: flex; align-items: center; gap: 15px; }
+        .nav-logo { 
+            /* height: 45px; width: 45px; object-fit: contain;
+            border-radius: 50%; background: white; padding: 2px; */
+
+            
+            height: 50px; /* Slightly increased size */
+            width: auto;  /* Allows width to adjust based on the logo's aspect ratio */
+            object-fit: contain;
+            background: black;
+        }
+        .logo-text { font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; }
+        .logo-text span { color: var(--primary-cyan); }
+        
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; position: relative; }
+        .nav-links a::after {
+            content: ''; position: absolute; width: 0; height: 2px;
+            bottom: -5px; left: 0; background-color: var(--primary-cyan);
+            transition: width 0.3s;
+        }
+        .nav-links a:hover { color: white; }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* --- HERO --- */
+        .hero {
+            height: 100vh; display: flex; align-items: center; position: relative;
+            /* Removed image background to let canvas show through, replaced with slight gradient overlay */
+            background: radial-gradient(circle at center, rgba(0,229,255,0.05) 0%, rgba(5,5,5,0) 70%);
+        }
+        /* .hero-overlay removed to see particles better, or made lighter */
+        .hero-content { position: relative; z-index: 2; text-align: center; width: 100%; }
+        
+        .badge {
+            background: rgba(0,229,255,0.1); color: var(--primary-cyan);
+            padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; font-weight: 600;
+            border: 1px solid rgba(0,229,255,0.3); display: inline-block; margin-bottom: 25px;
+            backdrop-filter: blur(5px);
+        }
+
+        .hero h1 { font-size: 4rem; line-height: 1.2; margin-bottom: 20px; font-weight: 800; text-shadow: 0 0 20px rgba(0,0,0,0.8); }
+        
+        /* TYPING EFFECT CURSOR */
+        .typewriter-text {
+            background: var(--gradient-blue);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            border-right: 4px solid var(--primary-cyan);
+            padding-right: 5px;
+            animation: blink 0.7s infinite;
+        }
+        @keyframes blink { 50% { border-color: transparent; } }
+
+        .hero p { color: var(--text-muted); max-width: 600px; margin: 0 auto 40px; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0,0,0,1); }
+        
+        .stats-bar {
+            margin-top: 80px; display: flex; justify-content: center; gap: 60px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2); 
+            padding-top: 40px;
+            backdrop-filter: blur(2px);
+        }
+        .stat h3 { font-size: 2.5rem; color: var(--primary-cyan); margin-bottom: 5px; }
+        .stat p { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #aaa; }
+
+        /* --- SECTIONS COMMON --- */
+        .section-header { text-align: center; margin-bottom: 60px; position: relative; z-index: 2; }
+        .section-header h4 { color: var(--primary-cyan); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; font-size: 0.9rem; }
+        .section-header h2 { font-size: 2.5rem; font-weight: 700; }
+        .section-header h2 span { color: var(--primary-cyan); }
+
+        /* --- FEATURES GRID --- */
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; position: relative; z-index: 2; }
+        .feature-card {
+            background: var(--bg-card); padding: 30px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.4s;
+            backdrop-filter: blur(10px); /* Glassmorphism */
+        }
+        .feature-card i { font-size: 2rem; color: var(--primary-cyan); margin-bottom: 20px; transition: 0.4s; }
+        .feature-card:hover {
+            transform: translateY(-10px); border-color: var(--primary-cyan);
+            box-shadow: 0 10px 30px rgba(0,229,255,0.1);
+        }
+        .feature-card:hover i { transform: scale(1.2) rotate(10deg); }
+
+        /* --- PROJECTS --- */
+        .project-card {
+            background: var(--bg-card); border-radius: 12px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.4s;
+            backdrop-filter: blur(10px);
+        }
+        .project-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .p-img { height: 200px; overflow: hidden; position: relative; }
+        .p-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .project-card:hover .p-img img { transform: scale(1.1); }
+        
+        .p-content { padding: 25px; }
+        .tech-stack span {
+            background: #222; font-size: 0.7rem; padding: 4px 8px; border-radius: 4px;
+            margin-right: 5px; border: 1px solid #333; display: inline-block; margin-bottom: 5px;
+        }
+        .p-links { margin-top: 20px; display: flex; gap: 10px; }
+        .btn-sm { padding: 6px 14px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; border: 1px solid #444; background: transparent; color: white; }
+        .btn-sm:hover { background: white; color: black; }
+
+        /* --- GALLERY --- */
+        .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; position: relative; z-index: 2; }
+        .g-item { height: 250px; overflow: hidden; border-radius: 8px; position: relative; cursor: pointer; }
+        .g-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .g-item:hover img { transform: scale(1.1); opacity: 0.8; }
+        .g-item.span-2 { grid-column: span 2; }
+        
+        /* --- EVENTS --- */
+        .event-card {
+            background: var(--bg-card); padding: 25px; border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .event-card:hover { border-color: var(--primary-orange); transform: translateX(5px); }
+        .e-date { color: #888; font-size: 0.85rem; margin-top: 5px; }
+        .e-badge { background: rgba(0,255,136,0.1); color: #00ff88; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; text-transform: uppercase; }
+
+        /* --- TEAM SECTION --- */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px; position: relative; z-index: 2;
+        }
+        .team-card {
+            background: var(--bg-card);
+            padding: 35px 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .team-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary-cyan);
+            box-shadow: 0 10px 30px rgba(0, 229, 255, 0.1);
+        }
+        .team-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            object-fit: cover;
+            border: 3px solid var(--bg-dark);
+            outline: 2px solid var(--primary-cyan);
+            transition: 0.3s;
+        }
+        .team-card:hover .team-img {
+            transform: scale(1.05);
+            border-color: var(--primary-cyan);
+        }
+        .team-role {
+            color: var(--primary-cyan);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .team-socials { margin-top: 15px; }
+        .team-socials a {
+            color: #777;
+            margin: 0 8px;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+        .team-socials a:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* --- FOOTER --- */
+        footer { background: black; padding: 60px 0 20px; border-top: 1px solid #222; margin-top: 80px; position: relative; z-index: 2; }
+        .footer-content { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 50px; }
+        .insti-logo-area { display: flex; align-items: center; gap: 15px; margin-top: 20px; }
+        .insti-logo { width: 50px; height: auto; object-fit: contain; }
+        .socials a { color: #888; margin-right: 15px; font-size: 1.2rem; transition: 0.3s; }
+        .socials a:hover { color: var(--primary-cyan); }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+            .stats-bar { flex-direction: column; gap: 20px; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .g-item.span-2 { grid-column: auto; }
+            .footer-content { grid-template-columns: 1fr; }
+            .event-card { flex-direction: column; text-align: center; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="tech-bg"></canvas>
+
+    <!-- <div id="preloader">
+        <img src="https://raw.githubusercontent.com/Robotics-Club-NIT-Patna/roboticsclubnitpweb/master/client/src/assets/images/logo.png" 
+             onerror="this.src='https://roboticsnitp.co.in/static/media/logo1.17cf3bc5d91473792a02.png'" 
+             alt="Robotics Club Logo" 
+             class="loader-logo">
+    </div> -->
+    <div id="preloader">
+        <div class="spinner-container">
+            <img src="favicon.ico.png" alt="Loading" class="preloader-logo">
+        </div>
+    </div>
+
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo-area">
+                    <img src="favicon.ico.png" 
+                           onerror="this.src='https://roboticsnitp.co.in/static/media/logo1.17cf3bc5d91473792a02.png'"
+                           class="nav-logo" 
+                           alt="Logo">
+                    <div class="logo-text">ROBOTICS <span>CLUB</span></div>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#projects">Projects</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+                    <li><a href="#events">Events</a></li>
+                    <li><a href="#team">Team</a></li>
+                </ul>
+                <a href="#" class="btn btn-cyan" style="padding: 8px 20px;">JOIN US</a>
+            </nav>
+        </div>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="container hero-content">
+            <span class="badge">NIT PATNA ROBOTICS CLUB</span>
+            <h1>Design. Build. <br><span class="typewriter-text"></span></h1>
+            
+            <p>Join our community of innovators and problem-solvers as we explore the exciting world of robotics through workshops and competitions.</p>
+            
+            <div style="display:flex; justify-content:center; gap:15px;">
+                <a href="#events" class="btn btn-primary">JOIN OUR CLUB &rightarrow;</a>
+                <a href="#projects" class="btn btn-outline">VIEW PROJECTS</a>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat"><h3>2015</h3><p>Est. Year</p></div>
+                <div class="stat"><h3>100+</h3><p>Active Members</p></div>
+                <div class="stat"><h3>50+</h3><p>Awards Won</p></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h4>What We Do</h4>
+                <h2>Building the <span>Future</span></h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-laptop-code"></i>
+                    <h3>Hackathons</h3>
+                    <p>Our members actively participate and win in Smart India Hackathons and other national coding challenges.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-microchip"></i>
+                    <h3>IoT & Embedded</h3>
+                    <p>Hands-on work with Arduino, Raspberry Pi, and creating smart automation solutions for real-world problems.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h3>Workshops</h3>
+                    <p>Regular sessions on 3D Printing, Drone Tech, and Bot Fabrication to upskill students.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h4>Our Work</h4>
+                <h2>Featured <span>Projects</span></h2>
+            </div>
+            <div class="features-grid">
+                <div class="project-card">
+                    <div class="p-img">
+                        <img src="Gemini_Generated_Image_ii7xwrii7xwrii7x.png" alt="Self Balancing Bot">
+                    </div>
+                    <div class="p-content">
+                        <h3>Self Balancing Bot</h3>
+                        <p style="color:#aaa; font-size:0.9rem; margin-bottom:15px;">An inverted pendulum robot that balances itself using PID control algorithms.</p>
+                        <div class="tech-stack"><span>PID</span><span>Arduino</span><span>Gyro</span></div>
+                        <div class="p-links">
+                            <button class="btn-sm"><i class="fas fa-code"></i> CODE</button>
+                            <button class="btn-sm"><i class="fas fa-play"></i> DEMO</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="p-img">
+                        <img src="Gemini_Generated_Image_t4qccwt4qccwt4qc.png" alt="Mark 1.6">
+                    </div>
+                    <div class="p-content">
+                        <h3>Mark 1.6 Arm</h3>
+                        <p style="color:#aaa; font-size:0.9rem; margin-bottom:15px;">Fully wireless Bluetooth-controlled robotic arm mounted on a 4WD chassis.</p>
+                        <div class="tech-stack"><span>Bluetooth</span><span>3D Print</span><span>NRF</span></div>
+                        <div class="p-links">
+                            <button class="btn-sm"><i class="fas fa-code"></i> CODE</button>
+                            <button class="btn-sm"><i class="fas fa-play"></i> DEMO</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="p-img">
+                        <img src="actuators-12-00393-g002.png" alt="Hexapod">
+                    </div>
+                    <div class="p-content">
+                        <h3>Hexapod</h3>
+                        <p style="color:#aaa; font-size:0.9rem; margin-bottom:15px;">A 6-legged robot capable of precise movement and aligning loads in 6 degrees of freedom.</p>
+                        <div class="tech-stack"><span>Arduino Nano</span><span>Servo</span><span>PCA9685</span></div>
+                        <div class="p-links">
+                            <button class="btn-sm"><i class="fas fa-code"></i> CODE</button>
+                            <button class="btn-sm"><i class="fas fa-play"></i> DEMO</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h4>Memories</h4>
+                <h2>Gallery</h2>
+            </div>
+            <div class="gallery-grid">
+                <div class="g-item span-2"><img src="get (2).jpeg" alt="Team"></div>
+                <div class="g-item"><img src="✨ _Everyone has a will to win But very few have the will to prepare to win_ 💫With immense plea.heic.jpg" alt="Tech"></div>
+                <div class="g-item"><img src="get.jpeg" alt="Soldering"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="events" class="section-padding">
+        <div class="container" style="max-width: 800px;">
+            <div class="section-header">
+                <h4>Stay Updated</h4>
+                <h2>Upcoming <span>Events</span></h2>
+            </div>
+            <div class="event-card" style="border-left: 4px solid var(--primary-orange);">
+                <div>
+                    <span class="e-badge">Featured</span>
+                    <h3>Web Dev Challenge</h3>
+                    <p class="e-date">Code For Future Robotics</p>
+                    <p style="color:#888; font-size:0.85rem; margin-top:5px;">Giving participants a platform to showcase their skills, creativity, and what they’re truly capable of building.</p>
+                </div>
+                <a href="#" class="btn btn-primary btn-sm">REGISTER</a>
+            </div>
+            <div class="event-card">
+                <div>
+                    <span class="e-badge" style="color:var(--primary-cyan); background:rgba(0,229,255,0.1)">NITP Special</span>
+                    <h3>Chakravyuh</h3>
+                    <p class="e-date">Maze Solving Competition</p>
+                    <p style="color:#888; font-size:0.85rem; margin-top:5px;">Solve the maze based on Abhimanyu's chakravyuh using autonomous bot logic.</p>
+                </div>
+                <a href="#" class="btn btn-outline btn-sm">DETAILS</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="team" class="section-padding">
+        <div class="container">
+            <div class="section-header">
+                <h4>The Crew</h4>
+                <h2>Meet Our <span>Team</span></h2>
+            </div>
+            <div class="team-grid">
+                <div class="team-card">
+                    <img src="https://ui-avatars.com/api/?name=Darshan+Jain&background=00e5ff&color=000" alt="President" class="team-img">
+                    <span class="team-role">President</span>
+                    <h3>Darshan Jain</h3>
+                    <div class="team-socials">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://ui-avatars.com/api/?name=Deepu+Gupta&background=ff5722&color=fff" alt="Captain" class="team-img">
+                    <span class="team-role">Captain</span>
+                    <h3>Deepu Kumar Gupta</h3>
+                    <div class="team-socials">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://ui-avatars.com/api/?name=Niharika+Rathod&background=00e5ff&color=000" alt="Secretary" class="team-img">
+                    <span class="team-role">Secretary</span>
+                    <h3>Niharika Rathod</h3>
+                    <div class="team-socials">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="team-card">
+                    <img src="https://ui-avatars.com/api/?name=Kapish+Varshney&background=ff5722&color=fff" alt="Vice Captain" class="team-img">
+                    <span class="team-role">Vice Captain</span>
+                    <h3>Kapish Varshney</h3>
+                    <div class="team-socials">
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:10px;">
+                        <img src="favicon.ico.png" 
+                             onerror="this.src='https://cdn-icons-png.flaticon.com/512/4712/4712035.png'"
+                             style="height:30px; border-radius:50%;" 
+                             alt="Club Logo"> 
+                        ROBOTICS CLUB
+                    </h3>
+                    <p style="color:#777; font-size:0.9rem; line-height:1.6;">The official Robotics Club of NIT Patna. Building robots, breaking barriers.</p>
+                    <div class="insti-logo-area">
+                        <img src="National_Institute_of_Technology,_Patna_Logo.png" class="insti-logo" alt="NIT Patna Logo">
+                        <div style="font-size:0.8rem; color:#aaa; line-height:1.2;">National Institute of<br>Technology, Patna</div>
+                    </div>
+                </div>
+                <div>
+                    <h3 style="margin-bottom:15px;">Quick Links</h3>
+                    <ul style="color:#777; line-height:2;">
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#projects">Projects</a></li>
+                        <li><a href="#team">Team</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="margin-bottom:15px;">Connect</h3>
+                    <div class="socials">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                    </div>
+                    <p style="margin-top:20px; color:#555; font-size:0.8rem;">&copy; 2025 Robotics Club NITP</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- CANVAS PARTICLE SYSTEM ---
+        const canvas = document.getElementById('tech-bg');
+        const ctx = canvas.getContext('2d');
+        let particlesArray;
+
+        // Set canvas size
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Handle resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles();
+        });
+
+        // Mouse interaction
+        const mouse = {
+            x: null,
+            y: null,
+            radius: 150 // Connection radius
+        }
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        // Particle Class
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.color = color;
+            }
+            // Draw individual particle
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = '#00e5ff'; // Cyan particles
+                ctx.fill();
+            }
+            // Update particle position and interaction
+            update() {
+                // Boundary check
+                if (this.x > canvas.width || this.x < 0) {
+                    this.directionX = -this.directionX;
+                }
+                if (this.y > canvas.height || this.y < 0) {
+                    this.directionY = -this.directionY;
+                }
+
+                // Mouse Collision/Repulsion (Optional subtle effect)
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                
+                // Move particle
+                this.x += this.directionX;
+                this.y += this.directionY;
+
+                this.draw();
+            }
+        }
+
+        // Initialize Particles
+        function initParticles() {
+            particlesArray = [];
+            let numberOfParticles = (canvas.height * canvas.width) / 9000; // Density
+            for (let i = 0; i < numberOfParticles; i++) {
+                let size = (Math.random() * 2) + 1;
+                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 0.5) - 0.25; // Slow speed
+                let directionY = (Math.random() * 0.5) - 0.25;
+                let color = '#00e5ff';
+
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        // Connect particles with lines
+        function connect() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                                 + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    
+                    // Connect close particles
+                    if (distance < (canvas.width/7) * (canvas.height/7)) {
+                        opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = 'rgba(0, 229, 255,' + opacityValue * 0.2 + ')'; // Cyan faint lines
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+                
+                // Connect to mouse
+                let mouseDistance = ((particlesArray[a].x - mouse.x) * (particlesArray[a].x - mouse.x))
+                                  + ((particlesArray[a].y - mouse.y) * (particlesArray[a].y - mouse.y));
+                
+                if (mouseDistance < 20000) { // Mouse radius squared
+                    ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)'; // Stronger line to mouse
+                    ctx.beginPath();
+                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connect();
+        }
+
+        // Start Canvas Animation
+        initParticles();
+        animate();
+
+
+        // --- EXISTING LOGIC ---
+        // 1. Loading Animation Logic
+        // window.addEventListener('load', () => {
+        //     const preloader = document.getElementById('preloader');
+        //     setTimeout(() => {
+        //         preloader.style.opacity = '0';
+        //         preloader.style.visibility = 'hidden';
+        //         typeEffect();
+        //     }, 1500);
+        // });
+
+        // 1. Loading Animation Logic
+        // window.addEventListener('load', () => {
+        //     const preloader = document.getElementById('preloader');
+        //     setTimeout(() => {
+        //         preloader.classList.add('preloader-hidden');
+        //         // Start typewriter only after loader vanishes
+        //         typeEffect(); 
+        //     }, 500); 
+        // });
+        // 1. Loading Animation Logic
+        window.addEventListener('load', () => {
+            const preloader = document.getElementById('preloader');
+            
+            // INCREASED TIME: Changed 500 to 2500 (2.5 seconds)
+            setTimeout(() => {
+                preloader.classList.add('preloader-hidden');
+                typeEffect(); 
+            }, 2500); 
+        });
+
+        // 2. Infinite Recurring Typing Effect Logic
+        const textToType = "Innovate.";
+        const typeElement = document.querySelector('.typewriter-text');
+        const typingSpeed = 150;
+        const deletingSpeed = 100;
+        const pauseTime = 2000;
+
+        function typeEffect() {
+            let currentText = "";
+            let i = 0;
+            let isDeleting = false;
+
+            function loop() {
+                if (isDeleting) {
+                    currentText = textToType.substring(0, i - 1);
+                    i--;
+                } else {
+                    currentText = textToType.substring(0, i + 1);
+                    i++;
+                }
+
+                typeElement.innerHTML = currentText;
+                let delta = isDeleting ? deletingSpeed : typingSpeed;
+
+                if (!isDeleting && i === textToType.length) {
+                    delta = pauseTime;
+                    isDeleting = true;
+                } else if (isDeleting && i === 0) {
+                    isDeleting = false;
+                    delta = 500;
+                }
+
+                setTimeout(loop, delta);
+            }
+            loop();
+        }
+
+        // 3. Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.style.background = 'rgba(5,5,5,0.95)';
+            } else {
+                header.style.background = 'rgba(5,5,5,0.8)';
+            }
+        });
+
+        // 4. Reveal on Scroll Animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.feature-card, .project-card, .event-card, .team-card').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
